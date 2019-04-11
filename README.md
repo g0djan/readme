@@ -1,4 +1,4 @@
-#WAL-G MySQL extension
+# WAL-G MySQL extension
 
 This extension allows you to use wal-g as a tool for encrypting, compressing and sending MySQL backups to storage without saving it on your filesystem.
 
