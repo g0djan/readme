@@ -31,7 +31,7 @@ WAL-G mysql extension currently supports these commands:
 
 When fetching backup's stream, the user should pass in the name of the backup. It returns encrypted data stream to stdout, you should pass it to backup tool that you used for create this backup.
 ```
-wal-g mysql stream-fetch example-backup | mysql_backup_tool use_backup
+wal-g mysql stream-fetch example-backup | some_backup_tool use_backup
 ```
 WAL-G can also fetch the latest backup using:
 
@@ -52,7 +52,7 @@ some_backup_tool make_backup | wal-g mysql stream-push
 Command for sending binlogs to storage by CRON.
 
 ```
-wal-g mysql binlogs-push /path/to/binlogs
+wal-g mysql binlog-push /path/to/binlogs
 ```
 
 * ``delete retain``
