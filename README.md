@@ -1,6 +1,6 @@
 # WAL-G MySQL extension
 
-This extension allows you to use wal-g as a tool for encrypting, compressing and sending MySQL backups to storage without saving it on your filesystem.
+This extension allows you to use wal-g as a tool for encrypting, compressing MySQL backups and push/fetch them to/from storage without saving it on your filesystem.
 
 Configuration
 -------------
@@ -64,7 +64,7 @@ wal-g mysql delete retain [FULL|FIND_FULL] retention_count
 
 * ``delete before``
 
-Delete backups before name or time. See  detailed description at the main readme. Usage:
+Delete backups before name or time. See detailed description at the main readme. Usage:
 ```
 wal-g mysql delete before [FIND_FULL] backup_name|time
 ```
