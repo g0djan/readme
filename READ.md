@@ -207,7 +207,7 @@ To set time [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) for recovery point.
 
 * `WALG_MYSQL_SSL_CA`
 
-To use SSL, a path to file with certificates should be set to this variable&
+To use SSL, a path to file with certificates should be set to this variable.
 
 Usage
 -----
