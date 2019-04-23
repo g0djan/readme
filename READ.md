@@ -31,7 +31,7 @@ For other incompatible systems, please consult the Development section for more 
 Configuration
 -------------
 
-###Common
+### Common
 
 **One of these variables is required**
 
@@ -112,7 +112,7 @@ If using S3 server-side encryption with `aws:kms`, the KMS Key ID to use for obj
 To configure compression method used for backups. Possible options are: `lz4`, 'lzma', 'brotli'. Default method is `lz4`. LZ4 is the fastest method, but compression ratio is bad.
 LZMA is way much slower, however it compresses backups about 6 times better than LZ4. Brotli is a good trade-off between speed and compression ratio which is about 3 times better than LZ4.
 
-###Postgres
+### Postgres
 WAL-G uses [the usual PostgreSQL environment variables](https://www.postgresql.org/docs/current/static/libpq-envars.html) to configure its connection, especially including `PGHOST`, `PGPORT`, `PGUSER`, and `PGPASSWORD`/`PGPASSFILE`/`~/.pgpass`.
 
 `PGHOST` can connect over a UNIX socket. This mode is preferred for localhost connections, set `PGHOST=/var/run/postgresql` to use it. WAL-G will connect over TCP if `PGHOST` is an IP address.
@@ -161,7 +161,7 @@ Delta computation is based on ModTime of file system and LSN number of pages in 
 * `WALG_DELTA_ORIGIN`
 Base for next delta backup (only if `WALG_DELTA_MAX_STEPS` is not exceeded). `WALG_DELTA_ORIGIN` can be LATEST (chaining increments), LATEST_FULL (for bases where volatile part is compact and chaining has no meaning - deltas overwrite each other). Defaults to LATEST.
 
-###MySQL
+### MySQL
 
 * `WALG_MYSQL_DATASOURCE_NAME`
 Path to MySQL data
@@ -180,7 +180,37 @@ Usage
 
 WAL-G currently supports these commands:
 
-###Postgres
+### Common
+
+* ``backup-list``
+
+Lists names and creation time of available backups.
+
+* ``delete``
+
+Is used to delete backups and WALs before them. By default ``delete`` will perform dry run. If you want to execute deletion you have to add ``--confirm`` flag at the end of the command.
+
+``delete`` can operate in two modes: ``retain`` and ``before``.
+
+``retain`` [FULL|FIND_FULL] %number%
+
+if FULL is specified keep 5 full backups and everything in the middle
+
+``before`` [FIND_FULL] %name%
+
+if FIND_FULL is specified WAL-G will calculate minimum backup needed to keep all deltas alive. If FIND_FULL is not specified and call can produce orphaned deltas - call will fail with the list.
+
+``retain 5`` will fail if 5th is delta
+
+``retain FULL 5`` will keep 5 full backups and all deltas of them
+
+``retain FIND_FULL`` will find necessary full for 5th
+
+``before base_000010000123123123`` will fail if base_000010000123123123 is delta
+
+``before FIND_FULL base_000010000123123123`` will keep everything after base of base_000010000123123123
+
+### Postgres
 
 * ``backup-fetch``
 
@@ -223,7 +253,7 @@ When uploading WAL archives to S3, the user should pass in the absolute path to 
 wal-g wal-push /path/to/archive
 ```
 
-###MySQL
+### MySQL
 
 * ``stream-fetch``
 
@@ -252,36 +282,6 @@ Command for sending binlogs to storage by CRON.
 ```
 wal-g mysql binlog-push /path/to/binlogs
 ```
-
-###Common
-
-* ``backup-list``
-
-Lists names and creation time of available backups.
-
-* ``delete``
-
-Is used to delete backups and WALs before them. By default ``delete`` will perform dry run. If you want to execute deletion you have to add ``--confirm`` flag at the end of the command.
-
-``delete`` can operate in two modes: ``retain`` and ``before``.
-
-``retain`` [FULL|FIND_FULL] %number%
-
-if FULL is specified keep 5 full backups and everything in the middle
-
-``before`` [FIND_FULL] %name%
-
-if FIND_FULL is specified WAL-G will calculate minimum backup needed to keep all deltas alive. If FIND_FULL is not specified and call can produce orphaned deltas - call will fail with the list.
-
-``retain 5`` will fail if 5th is delta
-
-``retain FULL 5`` will keep 5 full backups and all deltas of them
-
-``retain FIND_FULL`` will find necessary full for 5th
-
-``before base_000010000123123123`` will fail if base_000010000123123123 is delta
-
-``before FIND_FULL base_000010000123123123`` will keep everything after base of base_000010000123123123
 
 
 
