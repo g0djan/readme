@@ -74,18 +74,23 @@ Please, keep in mind that by default storing backups on disk along with database
 **Optional**
 
 * `AWS_REGION`(eg. `us-west-2`)
-WAL-G can automatically determine the S3 bucket's region using `s3:GetBucketLocation`, but if you wish to avoid this API call or forbid it from the applicable IAM policy, you can specify this variable.
+
+WAL-G can automatically determine the S3 bucket's region using `s3:GetBucketLocation`, but if you wish to avoid this API call or forbid it from the applicable IAM policy, specify:
 
 * `AWS_ENDPOINT`
+
 Overrides the default hostname to connect to an S3-compatible service. i.e, `http://s3-like-service:9000`
 
 * `AWS_S3_FORCE_PATH_STYLE`
+
 To enable path-style addressing(i.e., `http://s3.amazonaws.com/BUCKET/KEY`) when connecting to an S3-compatible service that lack of support for sub-domain style bucket URLs (i.e., `http://BUCKET.s3.amazonaws.com/KEY`). Defaults to `false`.
 
 * `WALG_AZURE_BUFFER_SIZE` (eg. `33554432`)
+
 Overrides the default `upload buffer size` of 67108864 bytes (64 MB). Note that the size of the buffer must be specified in bytes. Therefore, to use 32 MB sized buffers, this variable should be set to 33554432 bytes.
 
 * `WALG_AZURE_MAX_BUFFERS` (eg. `5`)
+
 Overrides the default `maximum number of upload buffers`. By default, at most 3 buffers are used concurrently.
 
 ***Example: Using Minio.io S3-compatible storage***
@@ -100,13 +105,17 @@ AWS_REGION: us-east-1
 ```
 
 * `WALG_S3_STORAGE_CLASS`
+
 To configure the S3 storage class used for backup files, use `WALG_S3_STORAGE_CLASS`. By default, WAL-G uses the "STANDARD" storage class. Other supported values include "STANDARD_IA" for Infrequent Access and "REDUCED_REDUNDANCY" for Reduced Redundancy.
 
 * `WALG_S3_SSE`
+
 To enable S3 server-side encryption, set to the algorithm to use when storing the objects in S3 (i.e., `AES256`, `aws:kms`).
 
 * `WALG_S3_SSE_KMS_ID`
+
 If using S3 server-side encryption with `aws:kms`, the KMS Key ID to use for object encryption.
+
 
 * `WALG_COMPRESSION_METHOD`
 To configure compression method used for backups. Possible options are: `lz4`, 'lzma', 'brotli'. Default method is `lz4`. LZ4 is the fastest method, but compression ratio is bad.
@@ -123,57 +132,70 @@ Disk read rate limit during ```backup-push``` in bytes per second.
 * `WALG_NETWORK_RATE_LIMIT`
 Network upload rate limit during ```backup-push``` in bytes per second.
 
+Concurrency values can be configured using:
+
 * `WALG_DOWNLOAD_CONCURRENCY`
-How many goroutines to use during backup-fetch and wal-push. By default, WAL-G uses the minimum of the number of files to extract and 10.
+
+To configure how many goroutines to use during backup-fetch  and wal-push, use `WALG_DOWNLOAD_CONCURRENCY`. By default, WAL-G uses the minimum of the number of files to extract and 10.
 
 * `WALG_UPLOAD_CONCURRENCY`
-How many concurrency streams to use during backup uploading. By default, WAL-G uses 10 streams.
+
+To configure how many concurrency streams to use during backup uploading, use `WALG_UPLOAD_CONCURRENCY`. By default, WAL-G uses 10 streams.
 
 * `WALG_UPLOAD_DISK_CONCURRENCY`
-Рow many concurrency streams are reading disk during backup-push. By default, WAL-G uses 1 stream.
+
+To configure how many concurrency streams are reading disk during ```backup-push```. By default, WAL-G uses 1 stream.
 
 * `WALG_SENTINEL_USER_DATA`
+
 This setting allows backup automation tools to add extra information to JSON sentinel file during ```backup-push```. This setting can be used e.g. to give user-defined names to backups.
 
 * `WALG_PREVENT_WAL_OVERWRITE`
+
 If this setting is specified, during ```wal-push``` WAL-G will check the existence of WAL before uploading it. If the different file is already archived under the same name, WAL-G will return the non-zero exit code to prevent PostgreSQL from removing WAL.
 
 * `WALG_GPG_KEY_ID`  (alternative form `WALE_GPG_KEY_ID`) ⚠️ **DEPRECATED**
+
 To configure GPG key for encryption and decryption. By default, no encryption is used. Public keyring is cached in the file "/.walg_key_cache".
 
 * `WALG_PGP_KEY`
+
 To configure encryption and decryption with OpenPGP standard.
 Set *private key* value, when you need to execute ```wal-fetch``` or ```backup-fetch``` command.
 Set *public key* value, when you need to execute ```wal-push``` or ```backup-push``` command.
 Keep in mind that the *private key* also contains the *public key*.
 
 * `WALG_PGP_KEY_PATH`
+
 Similar to `WALG_PGP_KEY`, but value is the path to the key on file system.
 
 * `WALG_PGP_KEY_PASSPHRASE`
+
 If your *private key* is encrypted with a *passphrase*, you should set *passpharse* for decrypt.
 
 * `WALG_DELTA_MAX_STEPS`
+
 Delta-backup is difference between previously taken backup and present state. `WALG_DELTA_MAX_STEPS` determines how many delta backups can be between full backups. Defaults to 0.
 Restoration process will automatically fetch all necessary deltas and base backup and compose valid restored backup (you still need WALs after start of last backup to restore consistent cluster).
 Delta computation is based on ModTime of file system and LSN number of pages in datafiles.
 
 * `WALG_DELTA_ORIGIN`
-Base for next delta backup (only if `WALG_DELTA_MAX_STEPS` is not exceeded). `WALG_DELTA_ORIGIN` can be LATEST (chaining increments), LATEST_FULL (for bases where volatile part is compact and chaining has no meaning - deltas overwrite each other). Defaults to LATEST.
+
+To configure base for next delta backup (only if `WALG_DELTA_MAX_STEPS` is not exceeded). `WALG_DELTA_ORIGIN` can be LATEST (chaining increments), LATEST_FULL (for bases where volatile part is compact and chaining has no meaning - deltas overwrite each other). Defaults to LATEST.
 
 ### MySQL
 
+To configure the path to MySQL data
 * `WALG_MYSQL_DATASOURCE_NAME`
-Path to MySQL data
 
+To store binlogs in the specified directory
 * `WALG_MYSQL_BINLOG_DST`
-Path to binary logs
 
-* `WALG_MYSQL_BINLOG_END_TS`
-Time for recovery point
+To set time for recovery point
+* `WALG_MYSQL_BINLOG_END_TS` 
 
+To use SSL, a path to file with certificates should be set to this variable
 * `WALG_MYSQL_SSL_CA`
-Allows use SSL. Path to file with certificates should be set to this variable
 
 Usage
 -----
@@ -259,12 +281,12 @@ wal-g wal-push /path/to/archive
 
 When fetching backup's stream, the user should pass in the name of the backup. It returns an encrypted data stream to stdout, you should pass it to a backup tool that you used to create this backup.
 ```
-wal-g mysql stream-fetch example-backup | some_backup_tool use_backup
+wal-g stream-fetch example-backup | some_backup_tool use_backup
 ```
 WAL-G can also fetch the latest backup using:
 
 ```
-wal-g mysql stream-fetch LATEST | some_backup_tool use_backup
+wal-g stream-fetch LATEST | some_backup_tool use_backup
 ```
 
 * ``stream-push``
@@ -272,7 +294,7 @@ wal-g mysql stream-fetch LATEST | some_backup_tool use_backup
 Command for compressing, encrypting and sending backup from stream to storage.
 
 ```
-some_backup_tool make_backup | wal-g mysql stream-push
+some_backup_tool make_backup | wal-g stream-push
 ```
 
 * ``binlog-push``
@@ -280,7 +302,7 @@ some_backup_tool make_backup | wal-g mysql stream-push
 Command for sending binlogs to storage by CRON.
 
 ```
-wal-g mysql binlog-push /path/to/binlogs
+wal-g binlog-push
 ```
 
 
