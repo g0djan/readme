@@ -75,7 +75,7 @@ Please, keep in mind that by default storing backups on disk along with database
 
 * `AWS_REGION`(eg. `us-west-2`)
 
-WAL-G can automatically determine the S3 bucket's region using `s3:GetBucketLocation`, but if you wish to avoid this API call or forbid it from the applicable IAM policy, specify:
+WAL-G can automatically determine the S3 bucket's region using `s3:GetBucketLocation`, but if you wish to avoid this API call or forbid it from the applicable IAM policy, specify this variable.
 
 * `AWS_ENDPOINT`
 
@@ -118,6 +118,7 @@ If using S3 server-side encryption with `aws:kms`, the KMS Key ID to use for obj
 
 
 * `WALG_COMPRESSION_METHOD`
+
 To configure compression method used for backups. Possible options are: `lz4`, 'lzma', 'brotli'. Default method is `lz4`. LZ4 is the fastest method, but compression ratio is bad.
 LZMA is way much slower, however it compresses backups about 6 times better than LZ4. Brotli is a good trade-off between speed and compression ratio which is about 3 times better than LZ4.
 
@@ -127,10 +128,13 @@ WAL-G uses [the usual PostgreSQL environment variables](https://www.postgresql.o
 `PGHOST` can connect over a UNIX socket. This mode is preferred for localhost connections, set `PGHOST=/var/run/postgresql` to use it. WAL-G will connect over TCP if `PGHOST` is an IP address.
 
 * `WALG_DISK_RATE_LIMIT`
-Disk read rate limit during ```backup-push``` in bytes per second.
+
+To configure disk read rate limit during ```backup-push``` in bytes per second.
 
 * `WALG_NETWORK_RATE_LIMIT`
-Network upload rate limit during ```backup-push``` in bytes per second.
+
+To configure network upload rate limit during ```backup-push``` in bytes per second.
+
 
 Concurrency values can be configured using:
 
