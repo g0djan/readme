@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/wal-g/wal-g.svg?branch=master)](https://travis-ci.org/wal-g/wal-g)
 [![Go Report Card](https://goreportcard.com/badge/github.com/wal-g/wal-g)](https://goreportcard.com/report/github.com/wal-g/wal-g)
 
-WAL-G is an archival restoration tool for Postgres.
+WAL-G is an archival restoration tool for Postgres and MySQL.
 
 WAL-G is the successor of WAL-E with a number of key differences. WAL-G uses LZ4, LZMA or Brotli compression, multiple processors and non-exclusive base backups for Postgres. More information on the design and implementation of WAL-G can be found on the Citus Data blog post ["Introducing WAL-G by Citus: Faster Disaster Recovery for Postgres"](https://www.citusdata.com/blog/2017/08/18/introducing-wal-g-faster-restores-for-postgres/).
 
@@ -30,10 +30,10 @@ For other incompatible systems, please consult the Development section for more 
 
 Configuration
 -------------
-**Required**
 
-WAL-G uses [the usual PostgreSQL environment variables](https://www.postgresql.org/docs/current/static/libpq-envars.html) to configure its connection, especially including `PGHOST`, `PGPORT`, `PGUSER`, and `PGPASSWORD`/`PGPASSFILE`/`~/.pgpass`.
+###Common
 
+**One of these variables is required**
 
 To connect to Amazon S3, WAL-G requires that this variable be set:
 
@@ -49,50 +49,44 @@ To store backups in Google Cloud Storage, WAL-G requires that this variable be s
 WAL-G determines Google Cloud credentials using [application-default credentials](https://cloud.google.com/docs/authentication/production) like other GCP tools. You can set `GOOGLE_APPLICATION_CREDENTIALS` to point to a service account json key from GCP. If you set nothing, WAL-G will attempt to fetch credentials from the GCE/GKE metadata service.
 
 
+To store backups in Azure Storage, WAL-G requires that this variable be set:
+
+* `WALG_AZ_PREFIX` to specify where to store backups in Azure storage (eg. `azure://test-container/walg-folder`)
+
+WAL-G determines Azure Storage credentials using [azure default credentials](https://docs.microsoft.com/en-us/azure/storage/common/storage-azure-cli#azure-cli-sample-script). You can set `AZURE_STORAGE_ACCOUNT`, `AZURE_STORAGE_ACCESS_KEY` to provide azure storage credentials.
+
+WAL-G sets default upload buffer size to 64 Megabytes, and uses 3 buffers by default. However, users can choose to override these values by setting optional environment variables.
+
+
+To store backups in Swift object storage, WAL-G requires that this variable be set:
+
+* `WALG_SWIFT_PREFIX` to specify where to store backups in Swift object storage (eg. `swift://test-container/walg-folder`)
+
+WAL-G determines Swift object storage credentials using [openStack default credentials](https://www.swiftstack.com/docs/cookbooks/swift_usage/auth.html). You can use any of V1, V2, V3 of the SwiftStack Auth middleware to provide Swift object storage credentials.
+
+
 To store backups on files system, WAL-G requires that these variables be set:
 
 * `WALG_FILE_PREFIX` (eg. `/tmp/wal-g-test-data`)
 
 Please, keep in mind that by default storing backups on disk along with database is not safe. Do not use it as a disaster recovery plan.
 
-
 **Optional**
 
-`PGHOST` can connect over a UNIX socket. This mode is preferred for localhost connections, set `PGHOST=/var/run/postgresql` to use it. WAL-G will connect over TCP if `PGHOST` is an IP address.
-
-WAL-G can automatically determine the S3 bucket's region using `s3:GetBucketLocation`, but if you wish to avoid this API call or forbid it from the applicable IAM policy, specify:
-
 * `AWS_REGION`(eg. `us-west-2`)
-
-Concurrency values can be configured using:
-
-* `WALG_DOWNLOAD_CONCURRENCY`
-
-To configure how many goroutines to use during backup-fetch  and wal-push, use `WALG_DOWNLOAD_CONCURRENCY`. By default, WAL-G uses the minimum of the number of files to extract and 10.
-
-* `WALG_UPLOAD_CONCURRENCY`
-
-To configure how many concurrency streams to use during backup uploading, use `WALG_UPLOAD_CONCURRENCY`. By default, WAL-G uses 10 streams.
-
-* `WALG_UPLOAD_DISK_CONCURRENCY`
-
-To configure how many concurrency streams are reading disk during ```backup-push```. By default, WAL-G uses 1 stream.
-
-* `WALG_SENTINEL_USER_DATA`
-
-This setting allows backup automation tools to add extra information to JSON sentinel file during ```backup-push```. This setting can be used e.g. to give user-defined names to backups.
-
-* `WALG_PREVENT_WAL_OVERWRITE`
-
-If this setting is specified, during ```wal-push``` WAL-G will check the existence of WAL before uploading it. If the different file is already archived under the same name, WAL-G will return the non-zero exit code to prevent PostgreSQL from removing WAL.
+WAL-G can automatically determine the S3 bucket's region using `s3:GetBucketLocation`, but if you wish to avoid this API call or forbid it from the applicable IAM policy, you can specify this variable.
 
 * `AWS_ENDPOINT`
-
 Overrides the default hostname to connect to an S3-compatible service. i.e, `http://s3-like-service:9000`
 
 * `AWS_S3_FORCE_PATH_STYLE`
-
 To enable path-style addressing(i.e., `http://s3.amazonaws.com/BUCKET/KEY`) when connecting to an S3-compatible service that lack of support for sub-domain style bucket URLs (i.e., `http://BUCKET.s3.amazonaws.com/KEY`). Defaults to `false`.
+
+* `WALG_AZURE_BUFFER_SIZE` (eg. `33554432`)
+Overrides the default `upload buffer size` of 67108864 bytes (64 MB). Note that the size of the buffer must be specified in bytes. Therefore, to use 32 MB sized buffers, this variable should be set to 33554432 bytes.
+
+* `WALG_AZURE_MAX_BUFFERS` (eg. `5`)
+Overrides the default `maximum number of upload buffers`. By default, at most 3 buffers are used concurrently.
 
 ***Example: Using Minio.io S3-compatible storage***
 
@@ -106,64 +100,87 @@ AWS_REGION: us-east-1
 ```
 
 * `WALG_S3_STORAGE_CLASS`
-
 To configure the S3 storage class used for backup files, use `WALG_S3_STORAGE_CLASS`. By default, WAL-G uses the "STANDARD" storage class. Other supported values include "STANDARD_IA" for Infrequent Access and "REDUCED_REDUNDANCY" for Reduced Redundancy.
 
 * `WALG_S3_SSE`
-
 To enable S3 server-side encryption, set to the algorithm to use when storing the objects in S3 (i.e., `AES256`, `aws:kms`).
 
 * `WALG_S3_SSE_KMS_ID`
-
 If using S3 server-side encryption with `aws:kms`, the KMS Key ID to use for object encryption.
 
-* `WALG_GPG_KEY_ID`  (alternative form `WALE_GPG_KEY_ID`) ⚠️ **DEPRECATED**
+* `WALG_COMPRESSION_METHOD`
+To configure compression method used for backups. Possible options are: `lz4`, 'lzma', 'brotli'. Default method is `lz4`. LZ4 is the fastest method, but compression ratio is bad.
+LZMA is way much slower, however it compresses backups about 6 times better than LZ4. Brotli is a good trade-off between speed and compression ratio which is about 3 times better than LZ4.
 
+###Postgres
+WAL-G uses [the usual PostgreSQL environment variables](https://www.postgresql.org/docs/current/static/libpq-envars.html) to configure its connection, especially including `PGHOST`, `PGPORT`, `PGUSER`, and `PGPASSWORD`/`PGPASSFILE`/`~/.pgpass`.
+
+`PGHOST` can connect over a UNIX socket. This mode is preferred for localhost connections, set `PGHOST=/var/run/postgresql` to use it. WAL-G will connect over TCP if `PGHOST` is an IP address.
+
+* `WALG_DISK_RATE_LIMIT`
+Disk read rate limit during ```backup-push``` in bytes per second.
+
+* `WALG_NETWORK_RATE_LIMIT`
+Network upload rate limit during ```backup-push``` in bytes per second.
+
+* `WALG_DOWNLOAD_CONCURRENCY`
+How many goroutines to use during backup-fetch and wal-push. By default, WAL-G uses the minimum of the number of files to extract and 10.
+
+* `WALG_UPLOAD_CONCURRENCY`
+How many concurrency streams to use during backup uploading. By default, WAL-G uses 10 streams.
+
+* `WALG_UPLOAD_DISK_CONCURRENCY`
+Рow many concurrency streams are reading disk during backup-push. By default, WAL-G uses 1 stream.
+
+* `WALG_SENTINEL_USER_DATA`
+This setting allows backup automation tools to add extra information to JSON sentinel file during ```backup-push```. This setting can be used e.g. to give user-defined names to backups.
+
+* `WALG_PREVENT_WAL_OVERWRITE`
+If this setting is specified, during ```wal-push``` WAL-G will check the existence of WAL before uploading it. If the different file is already archived under the same name, WAL-G will return the non-zero exit code to prevent PostgreSQL from removing WAL.
+
+* `WALG_GPG_KEY_ID`  (alternative form `WALE_GPG_KEY_ID`) ⚠️ **DEPRECATED**
 To configure GPG key for encryption and decryption. By default, no encryption is used. Public keyring is cached in the file "/.walg_key_cache".
 
 * `WALG_PGP_KEY`
-
 To configure encryption and decryption with OpenPGP standard.
 Set *private key* value, when you need to execute ```wal-fetch``` or ```backup-fetch``` command.
 Set *public key* value, when you need to execute ```wal-push``` or ```backup-push``` command.
 Keep in mind that the *private key* also contains the *public key*.
 
 * `WALG_PGP_KEY_PATH`
-
 Similar to `WALG_PGP_KEY`, but value is the path to the key on file system.
 
 * `WALG_PGP_KEY_PASSPHRASE`
-
 If your *private key* is encrypted with a *passphrase*, you should set *passpharse* for decrypt.
 
 * `WALG_DELTA_MAX_STEPS`
-
 Delta-backup is difference between previously taken backup and present state. `WALG_DELTA_MAX_STEPS` determines how many delta backups can be between full backups. Defaults to 0.
 Restoration process will automatically fetch all necessary deltas and base backup and compose valid restored backup (you still need WALs after start of last backup to restore consistent cluster).
 Delta computation is based on ModTime of file system and LSN number of pages in datafiles.
 
 * `WALG_DELTA_ORIGIN`
+Base for next delta backup (only if `WALG_DELTA_MAX_STEPS` is not exceeded). `WALG_DELTA_ORIGIN` can be LATEST (chaining increments), LATEST_FULL (for bases where volatile part is compact and chaining has no meaning - deltas overwrite each other). Defaults to LATEST.
 
-To configure base for next delta backup (only if `WALG_DELTA_MAX_STEPS` is not exceeded). `WALG_DELTA_ORIGIN` can be LATEST (chaining increments), LATEST_FULL (for bases where volatile part is compact and chaining has no meaning - deltas overwrite each other). Defaults to LATEST.
+###MySQL
 
-* `WALG_COMPRESSION_METHOD`
+* `WALG_MYSQL_DATASOURCE_NAME`
+Path to MySQL data
 
-To configure compression method used for backups. Possible options are: `lz4`, 'lzma', 'brotli'. Default method is `lz4`. LZ4 is the fastest method, but compression ratio is bad.
-LZMA is way much slower, however it compresses backups about 6 times better than LZ4. Brotli is a good trade-off between speed and compression ratio which is about 3 times better than LZ4.
+* `WALG_MYSQL_BINLOG_DST`
+Path to binary logs
 
-* `WALG_DISK_RATE_LIMIT`
+* `WALG_MYSQL_BINLOG_END_TS`
+Time for recovery point
 
-To configure disk read rate limit during ```backup-push``` in bytes per second.
-
-* `WALG_NETWORK_RATE_LIMIT`
-
-To configure network upload rate limit during ```backup-push``` in bytes per second.
+* `WALG_MYSQL_SSL_CA`
+Allows use SSL. Path to file with certificates should be set to this variable
 
 Usage
 -----
 
 WAL-G currently supports these commands:
 
+###Postgres
 
 * ``backup-fetch``
 
@@ -206,6 +223,38 @@ When uploading WAL archives to S3, the user should pass in the absolute path to 
 wal-g wal-push /path/to/archive
 ```
 
+###MySQL
+
+* ``stream-fetch``
+
+When fetching backup's stream, the user should pass in the name of the backup. It returns an encrypted data stream to stdout, you should pass it to a backup tool that you used to create this backup.
+```
+wal-g mysql stream-fetch example-backup | some_backup_tool use_backup
+```
+WAL-G can also fetch the latest backup using:
+
+```
+wal-g mysql stream-fetch LATEST | some_backup_tool use_backup
+```
+
+* ``stream-push``
+
+Command for compressing, encrypting and sending backup from stream to storage.
+
+```
+some_backup_tool make_backup | wal-g mysql stream-push
+```
+
+* ``binlog-push``
+
+Command for sending binlogs to storage by CRON.
+
+```
+wal-g mysql binlog-push /path/to/binlogs
+```
+
+###Common
+
 * ``backup-list``
 
 Lists names and creation time of available backups.
@@ -235,23 +284,38 @@ if FIND_FULL is specified WAL-G will calculate minimum backup needed to keep all
 ``before FIND_FULL base_000010000123123123`` will keep everything after base of base_000010000123123123
 
 
+
 Development
 -----------
 ### Installing
 
-To compile and build the binary:
+To compile and build the binary for Postgres:
 
 ```
 go get github.com/wal-g/wal-g
 make deps
-make all
+make pg_build
+```
+
+To compile and build the binary for MySQL:
+
+```
+go get github.com/wal-g/wal-g
+make deps
+make mysql_build
 ```
 Users can also install WAL-G by using `make install`. Specifying the GOBIN environment variable before installing allows the user to specify the installation location. On default, `make install` puts the compiled binary in `go/bin`.
 
 ```
 export GOBIN=/usr/local/bin
 make deps
-make install
+make pg_install
+```
+or
+```
+export GOBIN=/usr/local/bin
+make deps
+make mysql_install
 ```
 
 ### Testing
