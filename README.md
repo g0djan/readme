@@ -10,6 +10,7 @@ WAL-G is the successor of WAL-E with a number of key differences. WAL-G uses LZ4
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
+- [Databases](#databases)
 - [Development](#development)
 	- [Installing](#installing)
 	- [Testing](#testing)
@@ -120,6 +121,7 @@ If using S3 server-side encryption with `aws:kms`, the KMS Key ID to use for obj
 To configure compression method used for backups. Possible options are: `lz4`, 'lzma', 'brotli'. Default method is `lz4`. LZ4 is the fastest method, but compression ratio is bad.
 LZMA is way much slower, however it compresses backups about 6 times better than LZ4. Brotli is a good trade-off between speed and compression ratio which is about 3 times better than LZ4.
 
+More options are available for chosen database. See it in [Databases](#databases)
 
 Usage
 -----
@@ -154,6 +156,8 @@ if FIND_FULL is specified WAL-G will calculate minimum backup needed to keep all
 
 ``before FIND_FULL base_000010000123123123`` will keep everything after base of base_000010000123123123
 
+More commands are available for chosen database. See it in [Databases](#databases)
+
 Databases
 -----------
 ### PostgreSQL
@@ -165,7 +169,7 @@ Databases
 Development
 -----------
 ### Installing
-See information in section for your type of database
+It specified for your type of [database](#databases).
 
 ### Testing
 
