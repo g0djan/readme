@@ -1,5 +1,25 @@
 ## WAL-G for PostgreSQL
 
+Development
+-----------
+### Installing
+
+To compile and build the binary for Postgres:
+
+```
+go get github.com/wal-g/wal-g
+make deps
+make pg_build
+```
+
+Users can also install WAL-G by using `make install`. Specifying the GOBIN environment variable before installing allows the user to specify the installation location. On default, `make install` puts the compiled binary in `go/bin`.
+
+```
+export GOBIN=/usr/local/bin
+make deps
+make pg_install
+```
+
 Configuration
 -------------
 WAL-G uses [the usual PostgreSQL environment variables](https://www.postgresql.org/docs/current/static/libpq-envars.html) to configure its connection, especially including `PGHOST`, `PGPORT`, `PGUSER`, and `PGPASSWORD`/`PGPASSFILE`/`~/.pgpass`.
