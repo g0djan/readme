@@ -31,17 +31,16 @@ Usage
 
 WAL-G mysql extension currently supports these commands:
 
-
 * ``stream-fetch``
 
 When fetching backup's stream, the user should pass in the name of the backup. It returns an encrypted data stream to stdout, you should pass it to a backup tool that you used to create this backup.
 ```
-wal-g mysql stream-fetch example-backup | some_backup_tool use_backup
+wal-g stream-fetch example_backup | xbstream -x -C mysql_datadir
 ```
 WAL-G can also fetch the latest backup using:
 
 ```
-wal-g mysql stream-fetch LATEST | some_backup_tool use_backup
+wal-g stream-fetch LATEST | xbstream -x -C mysql_datadir
 ```
 
 * ``stream-push``
@@ -49,27 +48,13 @@ wal-g mysql stream-fetch LATEST | some_backup_tool use_backup
 Command for compressing, encrypting and sending backup from stream to storage.
 
 ```
-xtrabackup --backup --stream=xbstream --datadir=mysql_datadir | wal-g mysql stream-push
+xtrabackup --backup --stream=xbstream --datadir=mysql_datadir | wal-g stream-push
 ```
 
-* ``binlogs-push``
+* ``binlog-push``
 
 Command for sending binlogs to storage by CRON.
 
 ```
-wal-g mysql binlog-push
-```
-
-* ``delete retain``
-
-Saves retention_count number latest backups and delete other. See detailed description at the main readme. Usage:
-```
-wal-g mysql delete retain [FULL|FIND_FULL] retention_count
-```
-
-* ``delete before``
-
-Delete backups before name or time. See detailed description at the main readme. Usage:
-```
-wal-g mysql delete before [FIND_FULL] backup_name|time
+wal-g binlog-push
 ```
