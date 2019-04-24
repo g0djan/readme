@@ -2,9 +2,8 @@
 
 You can use wal-g as a tool for make encrypted, compressed PostgreSQL backups(full and incremental) and push/fetch them to/from storage without saving it on your filesystem.
 
-Development
+Installing
 -----------
-### Installing
 
 To compile and build the binary for Postgres:
 
