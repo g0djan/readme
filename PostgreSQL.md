@@ -1,6 +1,6 @@
 ## WAL-G for PostgreSQL
 
-You can use wal-g as a tool for make encrypted, compressed PostgreSQL backups(full and incremental) and push/fetch them to/from storage without saving it on your filesystem.
+You can use wal-g as a tool for making encrypted, compressed PostgreSQL backups(full and incremental) and push/fetch them to/from storage without saving it on your filesystem.
 
 Development
 -----------
@@ -34,7 +34,7 @@ To configure disk read rate limit during ```backup-push``` in bytes per second.
 
 * `WALG_NETWORK_RATE_LIMIT`
 
-To configure network upload rate limit during ```backup-push``` in bytes per second.
+To configure the network upload rate limit during ```backup-push``` in bytes per second.
 
 
 Concurrency values can be configured using:
@@ -80,7 +80,7 @@ If your *private key* is encrypted with a *passphrase*, you should set *passphar
 
 * `WALG_DELTA_MAX_STEPS`
 
-Delta-backup is difference between previously taken backup and present state. `WALG_DELTA_MAX_STEPS` determines how many delta backups can be between full backups. Defaults to 0.
+Delta-backup is the difference between previously taken backup and present state. `WALG_DELTA_MAX_STEPS` determines how many delta backups can be between full backups. Defaults to 0.
 Restoration process will automatically fetch all necessary deltas and base backup and compose valid restored backup (you still need WALs after start of last backup to restore consistent cluster).
 Delta computation is based on ModTime of file system and LSN number of pages in datafiles.
 
