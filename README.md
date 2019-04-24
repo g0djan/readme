@@ -161,15 +161,15 @@ More commands are available for chosen database. See it in [Databases](#database
 Databases
 -----------
 ### PostgreSQL
-[More information about installing, configuration and usage](https://github.com/g0djan/readme/blob/master/PostgreSQL.md)
+[Information about installing, configuration and usage](https://github.com/g0djan/readme/blob/master/PostgreSQL.md)
 
 ### MySQL
-[More information about installing, configuration and usage](https://github.com/g0djan/readme/blob/master/MySQL.md)
+[Information about installing, configuration and usage](https://github.com/g0djan/readme/blob/master/MySQL.md)
 
 Development
 -----------
 ### Installing
-It specified for your type of [database](#databases).
+It is specified for your type of [database](#databases).
 
 ### Testing
 
