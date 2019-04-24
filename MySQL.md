@@ -4,21 +4,26 @@ This extension allows you to use wal-g as a tool for encrypting, compressing MyS
 
 Configuration
 -------------
-**Required**
 
-WAL-G MySQL uses environment variables
-
-To configure the path to MySQL data
 * `WALG_MYSQL_DATASOURCE_NAME`
 
-To store binlogs in the specified directory
+To configure connection string for MySQL. Format ```user:password@host/dbname```
+
 * `WALG_MYSQL_BINLOG_DST`
 
-To set time for recovery point
-* `WALG_MYSQL_BINLOG_END_TS` 
+To place binlogs in the specified directory during stream-fetch.
 
-To use SSL, a path to file with certificates should be set to this variable
+* `WALG_MYSQL_BINLOG_SRC`
+
+To configure directory with binlogs for ```binlog-push```.
+
+* `WALG_MYSQL_BINLOG_END_TS`
+
+To set time [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) for recovery point.
+
 * `WALG_MYSQL_SSL_CA`
+
+To use SSL, a path to file with certificates should be set to this variable.
 
 
 Usage
