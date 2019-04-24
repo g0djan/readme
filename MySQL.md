@@ -24,7 +24,7 @@ Configuration
 
 * `WALG_MYSQL_DATASOURCE_NAME`
 
-To configure connection string for MySQL. Format ```user:password@host/dbname```
+To configure the connection string for MySQL. Format ```user:password@host/dbname```
 
 * `WALG_MYSQL_BINLOG_DST`
 
