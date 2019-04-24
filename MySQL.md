@@ -1,6 +1,6 @@
-# WAL-G MySQL extension
+## WAL-G for MySQL
 
-This extension allows you to use wal-g as a tool for encrypting, compressing MySQL backups and push/fetch them to/from storage without saving it on your filesystem.
+You can use wal-g as a tool for encrypting, compressing MySQL backups and push/fetch them to/from storage without saving it on your filesystem.
 
 Configuration
 -------------
@@ -49,7 +49,7 @@ wal-g mysql stream-fetch LATEST | some_backup_tool use_backup
 Command for compressing, encrypting and sending backup from stream to storage.
 
 ```
-some_backup_tool make_backup | wal-g mysql stream-push
+xtrabackup --backup --stream=xbstream --datadir=mysql_datadir | wal-g mysql stream-push
 ```
 
 * ``binlogs-push``
@@ -57,7 +57,7 @@ some_backup_tool make_backup | wal-g mysql stream-push
 Command for sending binlogs to storage by CRON.
 
 ```
-wal-g mysql binlog-push /path/to/binlogs
+wal-g mysql binlog-push
 ```
 
 * ``delete retain``
