@@ -65,3 +65,47 @@ Delta computation is based on ModTime of file system and LSN number of pages in 
 * `WALG_DELTA_ORIGIN`
 
 To configure base for next delta backup (only if `WALG_DELTA_MAX_STEPS` is not exceeded). `WALG_DELTA_ORIGIN` can be LATEST (chaining increments), LATEST_FULL (for bases where volatile part is compact and chaining has no meaning - deltas overwrite each other). Defaults to LATEST.
+
+Usage
+-----
+
+* ``backup-fetch``
+
+When fetching base backups, the user should pass in the name of the backup and a path to a directory to extract to. If this directory does not exist, WAL-G will create it and any dependent subdirectories.
+
+```
+wal-g backup-fetch ~/extract/to/here example-backup
+```
+
+WAL-G can also fetch the latest backup using:
+
+```
+wal-g backup-fetch ~/extract/to/here LATEST
+```
+
+* ``backup-push``
+
+When uploading backups to S3, the user should pass in the path containing the backup started by Postgres as in:
+
+```
+wal-g backup-push /backup/directory/path
+```
+If backup is pushed from replication slave, WAL-G will control timeline of the server. In case of promotion to master or timeline switch, backup will be uploaded but not finalized, WAL-G will exit with an error. In this case logs will contain information necessary to finalize the backup. You can use backuped data if you clearly understand entangled risks.
+
+* ``wal-fetch``
+
+When fetching WAL archives from S3, the user should pass in the archive name and the name of the file to download to. This file should not exist as WAL-G will create it for you.
+
+WAL-G will also prefetch WAL files ahead of asked WAL file. These files will be cached in `./.wal-g/prefetch` directory. Cache files older than recently asked WAL file will be deleted from the cache, to prevent cache bloat. If the file is requested with `wal-fetch` this will also remove it from cache, but trigger fulfilment of cache with new file.
+
+```
+wal-g wal-fetch example-archive new-file-name
+```
+
+* ``wal-push``
+
+When uploading WAL archives to S3, the user should pass in the absolute path to where the archive is located.
+
+```
+wal-g wal-push /path/to/archive
+```
