@@ -1,4 +1,4 @@
-### WAL-G for PostgreSQL
+## WAL-G for PostgreSQL
 
 Configuration
 -------------
